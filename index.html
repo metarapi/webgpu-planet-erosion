@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPU Terrain - WebGPU</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #111;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    #info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.6;
+      font-family: 'Courier New', monospace;
+      max-width: 300px;
+    }
+
+    #info p {
+      margin: 5px 0;
+    }
+
+    .label {
+      color: #0f0;
+      font-weight: bold;
+    }
+
+    .value {
+      color: #0ff;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <div id="info">
+    <p>
+      <span class="label">Controls:</span><br/>
+      Drag: rotate<br/>
+      Scroll: zoom<br/>
+    </p>
+    <p>
+      <span class="label">GPU Terrain</span><br/>
+      WebGPU • Cube-Sphere<br/>
+      Displaced Geometry<br/>
+    </p>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

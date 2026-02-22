@@ -1,0 +1,53 @@
+export const visualizerConfig = {
+  output: {
+    out: 'dump/cube_noise_eroded',
+  },
+  mesh: {
+    subdiv: 512,
+    scale: 0.01,
+    bias: -0.5,
+    radius: 1.0,
+  },
+  normal: {
+    strength: 1.0,
+    generatedScale: 0.125,
+    enabled: true,
+    eps: null,
+  },
+  textures: {
+    tileSize: 2048,
+    waterHeight: 0.48,
+    colorMode: 'height',
+  },
+  material: {
+    roughness: 0.45,
+    metallic: 0.0,
+    f0: 0.04,
+    lightIntensity: 2.5,
+    ambient: 0.02,
+    lightDir: [0.4, 0.7, 0.6],
+    baseColorMul: [1.0, 1.0, 1.0],
+  },
+  terrain: {
+    octaves: 3,
+    noiseScale: 2.0,
+    alpha: 0.0,
+    lacunarity: 2.0,
+    gain: 0.5,
+    outMin: 0.0,
+    outMax: 1.0,
+    dispScale: 0.1,
+    dispBias: -0.5,
+    erosionScale: 0.15,
+    erosionSlopePower: 0.9,
+    erosionCellScale: 0.50,
+    erosionHeightOffset: -0.5,
+    erosionGain: 0.5,
+    erosionLacunarity: 2.0,
+    erosionStrength: 0.2,
+    erosionOctaves: 5,
+  },
+  animation: {
+    rotationSpeed: 0.0,
+  },
+};
