@@ -286,7 +286,7 @@ fn Gullies3D(pos: vec3f, flow_dir: vec3f) -> vec4f {
 }
 
 fn ErosionFilter3D(dir: vec3f) -> f32 {
-    let d = normalize(dir);
+    let d = dir;
     
     let HEIGHT_OCTAVES = u32(p.f5.x);
     let EROSION_OCTAVES = u32(p.f5.y);

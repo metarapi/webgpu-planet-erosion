@@ -1,6 +1,6 @@
 # WebGPU Planet Erosion
 
-A WebGPU demonstrator that extends 2D procedural noise and hydraulic erosion to a 3D spherical domain. It generates seamless, eroded planets entirely on the GPU using WGSL compute shaders applied to a cube-sphere.
+A WebGPU [demonstrator](https://metarapi.github.io/webgpu-planet-erosion/) that extends 2D procedural noise and hydraulic erosion to a 3D spherical domain. It generates seamless, eroded planets entirely on the GPU using WGSL compute shaders applied to a cube-sphere. 
 
 ## Project Structure
 
@@ -55,6 +55,6 @@ This project is a high-fidelity **proof of concept** and is not fully optimized 
 ## Credits
 
 Based on the work and research of:
-- **Rune Skovbo Johansen, Fewes, & Clay John**: Single-pass directional hydraulic erosion noise and derivative scaling corrections.
+- **Rune Skovbo Johansen, Fewes, & Clay John**: [Erosion Noise](https://www.shadertoy.com/view/33cXW8) Single-pass directional hydraulic erosion noise and derivative scaling corrections.
 - **Stefan Gustavson & Ian McEwan**: [PSRDnoise](https://github.com/stegu/psrdnoise) (Periodic, Scalable, Rotating, and Directional noise).
-- **Ignacio Castaño**: [Seamless Cube Map Filtering](https://www.ludicon.com/castano/blog/articles/seamless-cube-map-filtering/) edge-fixup methodology.
+- **Phil Nowell**: [Mapping a Cube to a Sphere](https://mathproofs.blogspot.com/2005/07/mapping-cube-to-sphere.html).
