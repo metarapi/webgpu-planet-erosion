@@ -254,34 +254,105 @@ fn hash3(p: vec3f) -> vec3f {
     return fract3((p3.xxy + p3.yxx) * p3.zyx);
 }
 
-fn Gullies3D(pos: vec3f, flow_dir: vec3f) -> vec4f {
-    let ip = floor(pos);
-    let fp = fract3(pos);
+// 4x4x4 gather
+// fn Gullies3D(pos: vec3f, flow_dir: vec3f) -> vec4f {
+//     let ip = floor(pos);
+//     let fp = fract3(pos);
+
+//     var va = vec4f(0.0);
+//     var weightSum = 0.0;
+
+//     for (var i: i32 = -1; i <= 2; i++) {
+//         for (var j: i32 = -1; j <= 2; j++) {
+//             for (var k: i32 = -1; k <= 2; k++) {
+//                 let gridOffset = vec3f(f32(i), f32(j), f32(k));
+//                 let gridPoint = ip + gridOffset;
+
+//                 let randomOffset = (-1.0 + 2.0 * hash3(gridPoint)) * 0.5;
+//                 let v = fp - gridOffset - randomOffset;
+
+//                 let sqrDist = dot(v, v);
+//                 let weight = max(0.0, exp(-sqrDist * 2.0) - 0.01111);
+//                 weightSum += weight;
+
+//                 let waveInput = dot(v, flow_dir);
+//                 let height = cos(waveInput);
+//                 let grad = -sin(waveInput) * flow_dir;
+
+//                 va += vec4f(height, grad.x, grad.y, grad.z) * weight;
+//             }
+//         }
+//     }
+//     return va / max(weightSum, 1e-6);
+// }
+
+// 'normal: vec3f' is needed to define the tangent projection plane
+fn Gullies3D(pos: vec3f, flow_dir: vec3f, normal: vec3f) -> vec4f {
+    // Center the gather. By using floor(pos + 0.5), it guarantees  
+    // that the furthest lookup is exactly 1 cell away (3x3x3).
+    let ip = floor(pos + 0.5); 
+    let fp = pos - ip; // fp is now in range [-0.5, 0.5] instead of [0, 1]
 
     var va = vec4f(0.0);
     var weightSum = 0.0;
+    
+    // Define the kernel boundary (cylinder radius)
+    let r = 1.0; 
 
-    for (var i: i32 = -1; i <= 2; i++) {
-        for (var j: i32 = -1; j <= 2; j++) {
-            for (var k: i32 = -1; k <= 2; k++) {
+    // Reduced from 4x4x4 (64 taps) to 3x3x3 (27 taps)
+    for (var i: i32 = -1; i <= 1; i++) {
+        for (var j: i32 = -1; j <= 1; j++) {
+            for (var k: i32 = -1; k <= 1; k++) {
                 let gridOffset = vec3f(f32(i), f32(j), f32(k));
                 let gridPoint = ip + gridOffset;
 
-                let randomOffset = (-1.0 + 2.0 * hash3(gridPoint)) * 0.5;
+                // Hash to get a random point inside the cell.
+                // Subtract 0.5 to keep the jitter centered [-0.5, 0.5]
+                let randomOffset = hash3(gridPoint) - 0.5;
+                
+                // 3D Vector from the random impulse to evaluation point
                 let v = fp - gridOffset - randomOffset;
 
-                let sqrDist = dot(v, v);
-                let weight = max(0.0, exp(-sqrDist * 2.0) - 0.01111);
+                // Tangent Projection
+                // Calculate how far the impulse is above/below the surface
+                let dist_to_plane = dot(v, normal);
+
+                // Cylinder Height Test: discard if too far above/below
+                if (abs(dist_to_plane) > r) { continue; }
+
+                // Flatten the vector onto the 2D tangent plane
+                let v_tan = v - dist_to_plane * normal;
+
+                // Calculate the 2D squared distance
+                let sqrDist = dot(v_tan, v_tan);
+
+                // Cylinder Radius Test: discard if outside the circle
+                if (sqrDist > r * r) { continue; }
+
+                // Setup-Free Weight Modulation
+                // Fades out impulses that are further from the tangent plane 
+                // to maintain a uniform 2D distribution (from the paper Lagae2009)
+                let projection_weight = 1.0 - (abs(dist_to_plane) / r);
+
+                // Original Gaussian-ish falloff, adjusted to smoothly hit 0 at r=1.0
+                // (exp(-2.0) is approx 0.1353)
+                let falloff = max(0.0, exp(-sqrDist * 2.0) - 0.1353);
+                
+                let weight = projection_weight * falloff;
                 weightSum += weight;
 
-                let waveInput = dot(v, flow_dir);
+                // Evaluate the waveform using the FLATTENED vector
+                let waveInput = dot(v_tan, flow_dir);
                 let height = cos(waveInput);
+                
+                // Gradient remains 3D because flow_dir is already in tangent space
                 let grad = -sin(waveInput) * flow_dir;
 
                 va += vec4f(height, grad.x, grad.y, grad.z) * weight;
             }
         }
     }
+    
     return va / max(weightSum, 1e-6);
 }
 
@@ -330,7 +401,7 @@ fn ErosionFilter3D(dir: vec3f) -> f32 {
 
         var sideDir = cross(d, inputSlope) * EROSION_CELL_SCALE * 6.28318530718;
 
-        let g = Gullies3D(base_P * freq, sideDir);
+        let g = Gullies3D(base_P * freq, sideDir, d);
 
         currentHeight += g.x * strength;
         currentSlope += vec3f(g.y, g.z, g.w) * freq * strength;
